@@ -9,45 +9,7 @@
 public class ReservationAgency { // 영화 예매 절차를 구현하는 프로시저 클래스
     public Reservation reserve(Screening screening, Customer customer,
                                int audienceCount) {
-        Movie movie = screening.getMovie();
-
-        // 할인 가능 여부 확인
-        boolean discountable = false;
-        for(DiscountCondition condition : movie.getDiscountConditions()) {
-            if (condition.getType() == DiscountConditionType.PERIOD) {
-                discountable = screening.getWhenScreened().getDayOfWeek().equals(condition.getDayOfWeek()) &&
-                        condition.getStartTime().compareTo(screening.getWhenScreened().toLocalTime()) <= 0 &&
-                        condition.getEndTime().compareTo(screening.getWhenScreened().toLocalTime()) >= 0;
-            } else {
-                discountable = condition.getSequence() == screening.getSequence();
-            }
-
-            if (discountable) {
-                break;
-            }
-        }
-
-        // 할인 요금 계산
-        Money fee;
-        if (discountable) {
-            Money discountAmount = Money.ZERO;
-            switch(movie.getMovieType()) {
-                case AMOUNT_DISCOUNT: // 고정 금액
-                    discountAmount = movie.getDiscountAmount();
-                    break;
-                case PERCENT_DISCOUNT: // 비율 금액
-                    discountAmount = movie.getFee().times(movie.getDiscountPercent());
-                    break;
-                case NONE_DISCOUNT: // 할인 안함
-                    discountAmount = Money.ZERO;
-                    break;
-            }
-
-            fee = movie.getFee().minus(discountAmount).times(audienceCount);
-        } else {
-            fee = movie.getFee().times(audienceCount);
-        }
-
-        return new Reservation(customer, screening, fee, audienceCount);
+        Money fee = screening.calculateFee(audienceCount); // 예매 요금 계산
+        return new Reservation(customer, screening, fee, audienceCount); // 예매 생성
     }
 }

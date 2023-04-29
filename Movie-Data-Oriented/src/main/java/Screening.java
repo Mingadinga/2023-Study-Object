@@ -5,6 +5,25 @@ public class Screening {
     private int sequence;
     private LocalDateTime whenScreened;
 
+    // 오퍼레이션 - 예매 요금 계산
+    public Money calculateFee(int audienceCount) {
+        switch (movie.getMovieType()) {
+            case AMOUNT_DISCOUNT:
+                if (movie.isDiscountable(whenScreened, sequence)) {
+                    return movie.calculateAmountDiscountedFee().times(audienceCount);
+                }
+                break;
+            case PERCENT_DISCOUNT:
+                if (movie.isDiscountable(whenScreened, sequence)) {
+                    return movie.calculatePercentDiscountedFee().times(audienceCount);
+                }
+            case NONE_DISCOUNT:
+                movie.calculateNoneDiscountedFee().times(audienceCount);
+        }
+
+        return movie.calculateNoneDiscountedFee().times(audienceCount);
+    }
+
     public Movie getMovie() {
         return movie;
     }
